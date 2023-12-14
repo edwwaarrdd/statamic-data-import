@@ -106,9 +106,9 @@ class ImportJob implements ShouldQueue
                     $value = Arr::wrap($value);
                 }
 
-                if (is_numeric($value)) {
+               /* if (is_numeric($value)) {
                     $value += 0; // This returns int or float
-                }
+                }*/
 
                 return $value;
             });
