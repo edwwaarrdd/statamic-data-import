@@ -89,7 +89,9 @@ class ImportJob implements ShouldQueue
 
         $reader->getRows()->each(function (array $row, int $index) use (&$failedRows, &$errors, $fields) {
             $mappedData = $this->mapping->map(function (string $rowKey, string $fieldKey) use ($row, $fields) {
-                $value = trim($row[$rowKey]);
+                $value = mb_convert_encoding($row[$rowKey], "UTF-8", mb_detect_encoding($row[$rowKey], ['UTF-8', 'Windows-1252']));
+                //$value = mb_convert_encoding($row[$rowKey], 'UTF-8', 'UTF-8');
+                $value = trim($value);
                 $value = explode($this->arrayDelimiter, $value);
                 $value = count($value) === 1 ? $value[0] : $value;
 
@@ -114,9 +116,9 @@ class ImportJob implements ShouldQueue
                     }
                 }
 
-                if (is_numeric($value)) {
-                    $value += 0; // This returns int or float
-                }
+                /* if (is_numeric($value)) {
+                     $value += 0; // This returns int or float
+                 }*/
 
                 return $value;
             });
@@ -169,6 +171,17 @@ class ImportJob implements ShouldQueue
 
     protected function createEntry(Collection $data): \Statamic\Entries\Entry
     {
+        $entry = Entry::query()
+            ->where('collection', $this->collection->handle())
+            ->where('customer_number', $data->get('customer_number'))
+            ->first();
+
+        if ($entry) {
+            $entry->locale($this->site)->data(Arr::removeNullValues($data->all()));
+
+            return $entry;
+        }
+
         $entry = Entry::make()
             ->locale($this->site)
             ->collection($this->collection)
