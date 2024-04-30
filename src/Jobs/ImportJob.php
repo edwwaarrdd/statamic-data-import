@@ -18,6 +18,9 @@ use Statamic\Facades\User;
 use Statamic\Fields\Field;
 use Statamic\Fieldtypes\Toggle;
 use Statamic\Support\Arr;
+use function count;
+use function explode;
+use function trim;
 
 class ImportJob implements ShouldQueue
 {
@@ -89,7 +92,9 @@ class ImportJob implements ShouldQueue
 
         $reader->getRows()->each(function (array $row, int $index) use (&$failedRows, &$errors, $fields) {
             $mappedData = $this->mapping->map(function (string $rowKey, string $fieldKey) use ($row, $fields) {
-                $value = trim($row[$rowKey]);
+                $value = mb_convert_encoding($row[$rowKey], "UTF-8", mb_detect_encoding($row[$rowKey], ['UTF-8', 'Windows-1252']));
+                //$value = mb_convert_encoding($row[$rowKey], 'UTF-8', 'UTF-8');
+                $value = trim($value);
                 $value = explode($this->arrayDelimiter, $value);
                 $value = count($value) === 1 ? $value[0] : $value;
 
