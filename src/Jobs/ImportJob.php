@@ -174,6 +174,17 @@ class ImportJob implements ShouldQueue
 
     protected function createEntry(Collection $data): \Statamic\Entries\Entry
     {
+        $entry = Entry::query()
+            ->where('collection', $this->collection->handle())
+            ->where('customer_number', $data->get('customer_number'))
+            ->first();
+
+        if ($entry) {
+            $entry->locale($this->site)->data(Arr::removeNullValues($data->all()));
+
+            return $entry;
+        }
+
         $entry = Entry::make()
             ->locale($this->site)
             ->collection($this->collection)
