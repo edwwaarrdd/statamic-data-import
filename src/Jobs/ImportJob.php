@@ -84,6 +84,20 @@ class ImportJob implements ShouldQueue
             $blueprint = $this->collection->entryBlueprint();
         }
 
+        if ($this->collection->handle() !== 'locations'){
+            throw new \Exception('You can only import data into the locations collection');
+        }
+
+        //Delete all entries in collection
+        $entries = Entry::query()
+            ->where('collection', $this->collection->handle())
+            ->get();
+
+        $entries->each(function ($entry) {
+            $entry->delete();
+        });
+
+
         /** @var Collection $fields */
         $fields = $blueprint->fields()->resolveFields();
 
