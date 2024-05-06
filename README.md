@@ -1,3 +1,11 @@
+# Just used for some very specific changes to import for a client.
+
+
+```
+git diff main..brepols-fix > file.patch
+
+```
+
 # Data Import plugin for Statamic
 
 Import data from a CSV into a collection.
